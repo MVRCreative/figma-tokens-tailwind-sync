@@ -1,69 +1,58 @@
-# Welcome to your Lovable project
 
-## Project info
+# Design System Style Guide with Figma Integration
 
-**URL**: https://lovable.dev/projects/232377c7-793a-4624-8a69-9ecb485d1183
+A beautiful, minimalist design system style guide that integrates with Figma tokens for seamless design-to-code workflow.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Figma Tokens Integration**: Sync design tokens directly from Figma
+- **Comprehensive Style Guide**: Visual documentation of colors, typography, spacing, and components
+- **Component Library**: Built on React and Tailwind CSS
+- **Animation and Transitions**: Smooth, Apple-inspired animations
+- **Interactive Documentation**: Live examples of all components and styles
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/232377c7-793a-4624-8a69-9ecb485d1183) and start prompting.
+1. Clone this repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
+4. Visit `http://localhost:8080` to view the style guide
 
-Changes made via Lovable will be committed automatically to this repo.
+## Figma Integration
 
-**Use your preferred IDE**
+To set up Figma integration:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Install the "Figma Tokens" plugin in your Figma account
+2. Set up your design tokens in Figma following the plugin documentation
+3. Generate a personal access token in your Figma account settings
+4. Enter your Figma file ID and access token in the "Figma Integration" tab of the style guide
+5. Click "Sync with Figma" to pull the latest design tokens
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Project Structure
 
-Follow these steps:
+- `/src/tokens` - Design token management system
+- `/src/components` - UI components
+- `/src/tokens/figmaSync.ts` - Figma integration utilities
+- `/src/components/StyleGuide.tsx` - Main style guide component
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## How It Works
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+The integration between Figma and your React application works through these steps:
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Design tokens are defined in Figma using the "Figma Tokens" plugin
+2. Tokens are exported as a JSON file or accessed via the Figma API
+3. Our token sync system processes these tokens and converts them into the format needed by Tailwind CSS
+4. CSS variables are updated in real-time, reflecting the changes from Figma
+5. Components automatically use these updated tokens through Tailwind classes
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Customization
 
-**Edit a file directly in GitHub**
+You can customize the design system by:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Modifying the base tokens in `/src/tokens/index.ts`
+2. Updating the Tailwind theme in `tailwind.config.ts`
+3. Creating new components that follow the established design patterns
 
-**Use GitHub Codespaces**
+## License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/232377c7-793a-4624-8a69-9ecb485d1183) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+MIT
