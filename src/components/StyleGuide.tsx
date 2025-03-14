@@ -1,16 +1,18 @@
-
 import React, { useState } from 'react';
 import { tokens, getTokensByType, DesignToken } from '@/tokens';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { syncFigmaTokens, updateCssVariables, exportTokensForFigma } from '@/tokens/figmaSync';
+import { convertInlineStylesToVariables, formatComponentCode } from '@/utils/componentConverter';
 
 const StyleGuide: React.FC = () => {
   const [figmaFileId, setFigmaFileId] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [currentTokens, setCurrentTokens] = useState<DesignToken[]>(tokens);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [inputComponent, setInputComponent] = useState<string>('');
+  const [convertedComponent, setConvertedComponent] = useState<string>('');
 
   const colorTokens = getTokensByType('color');
   const spacingTokens = getTokensByType('spacing');
@@ -40,7 +42,6 @@ const StyleGuide: React.FC = () => {
     const figmaTokens = exportTokensForFigma();
     const jsonString = JSON.stringify(figmaTokens, null, 2);
     
-    // Create a download link
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -50,6 +51,15 @@ const StyleGuide: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleConvertComponent = () => {
+    if (!inputComponent.trim()) {
+      return;
+    }
+    
+    const converted = convertInlineStylesToVariables(inputComponent);
+    setConvertedComponent(converted);
   };
 
   return (
@@ -72,6 +82,7 @@ const StyleGuide: React.FC = () => {
           <TabsTrigger value="spacing">Spacing</TabsTrigger>
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="figma">Figma Integration</TabsTrigger>
+          <TabsTrigger value="converter">React Converter</TabsTrigger>
         </TabsList>
         
         <TabsContent value="colors" className="animate-slide-up">
@@ -468,6 +479,151 @@ const StyleGuide: React.FC = () => {
                 <p className="text-sm">
                   Click "Export Tokens" to download a JSON file of your tokens that can be committed to version control.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="converter" className="animate-slide-up">
+          <h2 className="text-2xl font-bold mb-6">React Component Converter</h2>
+          <p className="text-muted-foreground mb-6">
+            Convert React components with inline styles to use CSS variables. Paste your component code below and click "Convert".
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Input Component</CardTitle>
+                <CardDescription>Paste your React component with inline styles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <textarea 
+                  className="w-full h-80 p-4 font-mono text-sm border rounded-md"
+                  placeholder="Paste your React component code here..."
+                  value={inputComponent}
+                  onChange={(e) => setInputComponent(e.target.value)}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleConvertComponent}>Convert Component</Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Converted Component</CardTitle>
+                <CardDescription>Component with CSS variables</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <textarea 
+                    className="w-full h-80 p-4 font-mono text-sm border rounded-md"
+                    readOnly
+                    value={convertedComponent}
+                  />
+                  {convertedComponent && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(convertedComponent);
+                        alert('Copied to clipboard!');
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <p className="text-xs text-muted-foreground">
+                  CSS variables are defined at the top of the converted code. Add them to your stylesheet.
+                </p>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>How It Works</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-md bg-muted p-4">
+                <h3 className="text-lg font-semibold mb-2">1. Paste Your Component</h3>
+                <p className="text-sm">
+                  Paste your React component code with inline styles into the input area.
+                </p>
+              </div>
+              
+              <div className="rounded-md bg-muted p-4">
+                <h3 className="text-lg font-semibold mb-2">2. Convert</h3>
+                <p className="text-sm">
+                  Click "Convert Component" to transform inline style values into CSS variables.
+                </p>
+              </div>
+              
+              <div className="rounded-md bg-muted p-4">
+                <h3 className="text-lg font-semibold mb-2">3. Copy Variables</h3>
+                <p className="text-sm">
+                  The converter automatically adds CSS variable declarations as a comment at the top.
+                  Add these variables to your CSS or stylesheet file.
+                </p>
+              </div>
+              
+              <div className="rounded-md bg-muted p-4">
+                <h3 className="text-lg font-semibold mb-2">4. Use Your Converted Component</h3>
+                <p className="text-sm">
+                  Copy the converted component code and use it in your project.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Example</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Original</h3>
+                  <pre className="p-4 bg-muted rounded-md overflow-x-auto text-sm">
+                    {`<div style={{ 
+  color: "#333", 
+  backgroundColor: "#f5f5f5",
+  padding: "10px",
+  borderRadius: "4px"
+}}>
+  <h2 style={{ color: "#007bff" }}>Hello World</h2>
+  <p style={{ fontSize: "14px" }}>This is a sample component</p>
+</div>`}
+                  </pre>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Converted</h3>
+                  <pre className="p-4 bg-muted rounded-md overflow-x-auto text-sm">
+                    {`/*
+CSS Variables to add to your stylesheet:
+:root {
+  --color-333: #333;
+  --backgroundColor-f5f5f5: #f5f5f5;
+  --color-007bff: #007bff;
+}
+*/
+
+<div style={{ 
+  color: var(--color-333), 
+  backgroundColor: var(--backgroundColor-f5f5f5),
+  padding: "10px",
+  borderRadius: "4px"
+}}>
+  <h2 style={{ color: var(--color-007bff) }}>Hello World</h2>
+  <p style={{ fontSize: "14px" }}>This is a sample component</p>
+</div>`}
+                  </pre>
+                </div>
               </div>
             </CardContent>
           </Card>
